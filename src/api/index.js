@@ -1,9 +1,10 @@
 import axios from "axios";
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
 });
 
-// Ye function har request se pehle token add karega
+// Add token to every request
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -12,11 +13,11 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// 🔐 Auth
+// Auth
 export const registerUser = (data) => API.post("/api/v1/user/register", data);
 export const loginUser = (data) => API.post("/api/v1/user/login", data);
 
-// 📝 Todos
+// Todos
 export const getTodos = (page = 1) => API.get(`/api/v1/todo?page=${page}`);
 export const createTodo = (data) => API.post("/api/v1/todo", data);
 export const updateTodo = (id, data) => API.put(`/api/v1/todo/${id}`, data);
