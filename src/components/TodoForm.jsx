@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { createTodo, updateTodo } from '../api';
+import { useToast } from '../context/ToastContext';
 
 function TodoForm({ onSave, editing }) {
   const [form, setForm] = useState({ title: '', description: '', category: '', dueDate: '' });
-  const [error, setError] = useState('');
+  const { error, success, warning } = useToast();
 
   useEffect(() => {
     if (editing) {
-      setForm(editing); // populate form for editing
-      setError(''); // clear previous errors
+      setForm({
+        title: editing.title || '',
+        description: editing.description || '',
+        category: editing.category || '',
+        dueDate: editing.dueDate ? editing.dueDate.split('T')[0] : ''
+      });
     } else {
       setForm({ title: '', description: '', category: '', dueDate: '' });
     }
@@ -16,78 +21,41 @@ function TodoForm({ onSave, editing }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-
-    // ✅ Check if due date is in the past
     if (form.dueDate) {
-      const today = new Date();
-      const due = new Date(form.dueDate);
-      today.setHours(0,0,0,0); // ignore time
-      if (due < today) {
-        setError('Due date cannot be in the past');
-        return; // stop submission
-      }
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      if (new Date(form.dueDate) < today) { warning('Due date cannot be in the past'); return; }
     }
-
     try {
-      if (editing) {
-        await updateTodo(editing._id, form);
-      } else {
-        await createTodo(form);
-      }
-
-      onSave(); // refresh the list
-      setForm({ title: '', description: '', category: '', dueDate: '' }); // clear form
-    } catch (err) {
-      console.error('Todo save error:', err.response?.data || err.message);
-      setError('Error saving todo');
-    }
+      if (editing) { await updateTodo(editing._id, form); success('Todo updated!'); }
+      else { await createTodo(form); success('Todo created!'); }
+      onSave();
+      setForm({ title: '', description: '', category: '', dueDate: '' });
+    } catch (err) { error(err.response?.data?.message || 'Error saving todo'); }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px', background: '#fff' }}>
-      <h3 style={{ marginBottom: '10px', color: '#333' }}>{editing ? 'Update Todo' : 'Add Todo'}</h3>
-      
-      {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
-
-      <input
-        type="text"
-        placeholder="Title"
-        value={form.title}
-        onChange={(e) => setForm({ ...form, title: e.target.value })}
-        style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
-        required
-      />
-
-      <textarea
-        placeholder="Description"
-        value={form.description}
-        onChange={(e) => setForm({ ...form, description: e.target.value })}
-        style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '5px', border: '1px solid #ccc', height: '80px' }}
-      />
-
-      <input
-        type="text"
-        placeholder="Category (e.g., Work)"
-        value={form.category}
-        onChange={(e) => setForm({ ...form, category: e.target.value })}
-        style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
-      />
-
-      <input
-        type="date"
-        value={form.dueDate}
-        onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-        style={{ width: '100%', padding: '8px', marginBottom: '8px', borderRadius: '5px', border: '1px solid #ccc' }}
-      />
-
-      <button
-        type="submit"
-        style={{ width: '100%', padding: '10px', background: editing ? '#28a745' : '#007bff', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-      >
-        {editing ? 'Update' : 'Add'}
-      </button>
-    </form>
+    <div className="todo-form-card">
+      <h3><span className="material-icons">{editing ? 'edit' : 'add_task'}</span> {editing ? 'Update Todo' : 'Add New Todo'}</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <input type="text" placeholder="What needs to be done?" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
+        </div>
+        <div className="form-group">
+          <textarea placeholder="Add a description..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows="2" />
+        </div>
+        <div className="form-row">
+          <div className="form-group">
+            <input type="text" placeholder="Category" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+          </div>
+          <div className="form-group">
+            <input type="date" value={form.dueDate} onChange={(e) => setForm({ ...form, dueDate: e.target.value })} />
+          </div>
+        </div>
+        <button type="submit" className={`btn-primary ${editing ? 'btn-success' : ''}`}>
+          <span className="material-icons">{editing ? 'save' : 'add'}</span> {editing ? 'Update Todo' : 'Add Todo'}
+        </button>
+      </form>
+    </div>
   );
 }
 

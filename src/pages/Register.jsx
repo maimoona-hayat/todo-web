@@ -1,56 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../api';
+import { useToast } from '../context/ToastContext';
 
 function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { error, success } = useToast();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  console.log("Sending data:", form); // ← add this
-  try {
-    const res = await registerUser(form);
-    if (res.data.isSuccess) navigate('/login');
-  } catch (err) {
-    console.log(err.response?.data); // ← backend error dekhne ke liye
-    setError('Registration failed');
-  }
-};
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) navigate('/dashboard', { replace: true });
+  }, [navigate]);
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await registerUser(form);
+      if (res.data.isSuccess) {
+        success('Account created! Please login.');
+        navigate('/login');
+      }
+    } catch (err) {
+      error(err.response?.data?.message || 'Registration failed');
+    }
+  };
 
   return (
-    <div className="form-container">
-      <form onSubmit={handleSubmit}>
-        <h2>Register</h2>
-        {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
-        <input
-          type="text"
-          placeholder="Username"
-          value={form.username}
-          onChange={(e) => setForm({ ...form, username: e.target.value })}
-          required
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
-        />
-        <button type="submit">Register</button>
-        <p>Already have an account? <Link to="/login">Login</Link></p>
-      </form>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-icon"><span className="material-icons">person_add</span></div>
+        <h2>Create Account</h2>
+        <p className="auth-subtitle">Join us today</p>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label><span className="material-icons">badge</span> Username</label>
+            <input type="text" placeholder="Choose a username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} required />
+          </div>
+          <div className="form-group">
+            <label><span className="material-icons">email</span> Email</label>
+            <input type="email" placeholder="Enter your email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+          </div>
+          <div className="form-group">
+            <label><span className="material-icons">lock</span> Password</label>
+            <input type="password" placeholder="Create a password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
+          </div>
+          <button type="submit" className="btn-primary"><span className="material-icons">person_add</span> Create Account</button>
+        </form>
+        <p className="auth-footer">Already have an account? <Link to="/login">Sign in</Link></p>
+      </div>
     </div>
-    
   );
 }
 

@@ -10,12 +10,11 @@ function Dashboard() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [editing, setEditing] = useState(null);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
-  const storedUser = localStorage.getItem('user');
-  const user = storedUser ? JSON.parse(storedUser) : null;
-  const firstLetter = user?.username ? user.username.charAt(0).toUpperCase() : 'U';
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const firstLetter = user.username?.charAt(0).toUpperCase() || 'U';
 
   const fetchTodos = async (p = 1) => {
     try {
@@ -26,8 +25,11 @@ function Dashboard() {
         setPage(p);
       }
     } catch (err) {
-      console.error(err);
-      if (err.response?.status === 401) navigate('/login');
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        navigate('/login');
+      }
     }
   };
 
@@ -44,75 +46,23 @@ function Dashboard() {
   };
 
   return (
-    <div style={{ padding: '20px', minHeight: '100vh', background: '#e6f0ff', fontFamily: 'Arial, sans-serif' }}>
-      
-      {/* Header Column */}
-      <div style={{ display: 'flex', flexDirection: 'row', justifyContent:"space-around",alignItems: 'center', marginBottom: '30px' }}>
-        <h1 style={{ margin: '0 0 10px 0', color: '#003366' }}>My Todos</h1>
-        <div style={{ position: 'relative' }}>
-          <div
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            style={{
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              background: '#007bff',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '18px',
-              cursor: 'pointer',
-              userSelect: 'none'
-            }}
-          >
-            {firstLetter}
-          </div>
-          {showUserMenu && user && (
-            <div style={{
-              position: 'absolute',
-              right: 0,
-              top: '60px',
-              background: '#cce0ff',
-              border: '1px solid #99c2ff',
-              borderRadius: '8px',
-              padding: '15px',
-              minWidth: '200px',
-              zIndex: 100,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-            }}>
-              <p style={{ margin: 0, fontWeight: 'bold', color: '#003366' }}>{user.username}</p>
-              <p style={{ margin: '5px 0', color: '#003366', fontSize: '14px' }}>{user.email}</p>
-              <button
-                onClick={handleLogout}
-                style={{
-                  marginTop: '10px',
-                  width: '100%',
-                  background: '#dc3545',
-                  color: 'white',
-                  padding: '7px 10px',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer'
-                }}
-              >
-                Logout
-              </button>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <h1 className="dashboard-title"><span className="material-icons" style={{ verticalAlign: 'middle', marginRight: '8px' }}>dashboard</span>My Todos</h1>
+        <div className="user-menu">
+          <div className="user-avatar" onClick={() => setShowMenu(!showMenu)}>{firstLetter}</div>
+          {showMenu && (
+            <div className="user-dropdown">
+              <p>{user.username}</p>
+              <p className="user-email">{user.email}</p>
+              <button className="btn-logout" onClick={handleLogout}><span className="material-icons">logout</span> Logout</button>
             </div>
           )}
         </div>
       </div>
-
-      {/* Content Flex */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px', margin: '0 auto' }}>
-        <TodoForm
-          onSave={() => { fetchTodos(page); setEditing(null); }}
-          editing={editing}
-        />
-        <TodoList todos={todos} onEdit={setEditing} onDelete={() => fetchTodos(page)} />
-        <Pagination total={total} page={page} onPageChange={fetchTodos} />
-      </div>
+      <TodoForm onSave={() => { fetchTodos(page); setEditing(null); }} editing={editing} />
+      <TodoList todos={todos} onEdit={setEditing} onDelete={() => fetchTodos(page)} />
+      <Pagination total={total} page={page} onPageChange={fetchTodos} />
     </div>
   );
 }

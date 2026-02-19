@@ -1,126 +1,46 @@
 import React from 'react';
 import { deleteTodo, updateTodo } from '../api';
+import { useToast } from '../context/ToastContext';
 
 function TodoList({ todos = [], onEdit, onDelete }) {
+  const { error, success } = useToast();
 
-  // Delete todo
   const handleDelete = async (id) => {
-    if (!id) return;
     if (!window.confirm('Delete this todo?')) return;
-
-    try {
-      await deleteTodo(id);
-      onDelete();
-    } catch (err) {
-      console.error('Delete failed:', err.response?.data || err.message);
-    }
+    try { await deleteTodo(id); success('Todo deleted!'); onDelete(); }
+    catch (err) { error(err.response?.data?.message || 'Failed to delete'); }
   };
 
-  // Toggle Completed
   const toggleComplete = async (todo) => {
     try {
-      // Sirf backend ke allowed fields bhej rahe hain
-      const { title, description, category, dueDate, isCompleted } = todo;
-      const updatedTodo = {
-        title,
-        description,
-        category,
-        dueDate,
-        isCompleted: !isCompleted
-      };
-
-      await updateTodo(todo._id, updatedTodo);
-      onDelete(); // refresh todos
-    } catch (err) {
-      console.error('Update failed:', err.response?.data || err.message);
-    }
+      await updateTodo(todo._id, { title: todo.title, description: todo.description, category: todo.category, dueDate: todo.dueDate, isCompleted: !todo.isCompleted });
+      success(todo.isCompleted ? 'Marked as pending!' : 'Marked as completed!');
+      onDelete();
+    } catch (err) { error(err.response?.data?.message || 'Failed to update'); }
   };
 
-  if (!todos.length) {
-    return <p style={{ color: '#666', marginTop: '20px' }}>No todos found.</p>;
-  }
+  if (!todos.length) return <div className="empty-state"><span className="material-icons">assignment</span><p>No todos yet. Add your first todo above!</p></div>;
 
   return (
-    <div
-      className="todo-grid"
-      style={{
-        display: 'grid',
-        gap: '12px',
-        marginTop: '20px',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'
-      }}
-    >
+    <div className="todo-grid">
       {todos.map((todo) => (
-        <div
-          key={todo._id}
-          className="todo-card"
-        style={{
-              padding: '10px', // smaller padding
-            border: '1px solid #99c2ff',
-            borderRadius: '6px',
-            background: '#ffffff',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)', // smaller shadow
-            minHeight: '120px' // slightly smaller height
-        }}
-        >
-         <h4
-            style={{
-              marginBottom: '6px',
-              color: '#003366',
-              fontSize: '16px',
-              textDecoration: todo.isCompleted ? 'line-through' : 'none' // overline for completed
-            }}
-          >
-            {todo.title}
-          </h4>
-          <p style={{ color: '#666', marginBottom: '5px' }}>{todo.description || 'No description'}</p>
-          <p style={{ fontSize: '14px', color: '#999', marginBottom: '3px' }}>
-            Category: {todo.category || 'None'}
-          </p>
-          <p style={{ fontSize: '14px', color: '#999', marginBottom: '3px' }}>
-            Due: {todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : 'None'}
-          </p>
-
-          {/* Status Button */}
-     <button
-  onClick={() => toggleComplete(todo)}
-  className={`status-btn ${todo.isCompleted ? 'completed' : 'pending'}`}
-  style={{
-    width: '100%',
-    background: todo.isCompleted ? '#28a745' : '#007bff',
-    color: 'white',
-    padding: '7px 0',
-    border: 'none',
-    borderRadius: '5px',
-    marginBottom: '10px',
-    cursor: 'pointer'
-  }}
->
-  {todo.isCompleted ? 'Completed' : 'Mark Complete'}
-</button>
-
-<div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-  <button  style={{
-                flex: 1,
-                background: '#ffc107',
-                color: 'white',
-                padding: '7px 0',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }} 
-              onClick={() => onEdit(todo)} className="edit-btn">Edit</button>
-  <button onClick={() => handleDelete(todo._id)} className="delete-btn"
-      style={{
-                flex: 1,
-                background: '#dc3545',
-                color: 'white',
-                padding: '7px 0',
-                border: 'none',
-                borderRadius: '5px',
-                cursor: 'pointer'
-              }}>Delete</button>
-</div>
+        <div key={todo._id} className={`todo-card ${todo.isCompleted ? 'completed' : ''}`}>
+          <div className="todo-header">
+            <h4 className={todo.isCompleted ? 'completed-text' : ''}>{todo.title}</h4>
+            <span className={`status-badge ${todo.isCompleted ? 'badge-success' : 'badge-pending'}`}>{todo.isCompleted ? 'Done' : 'Pending'}</span>
+          </div>
+          <p className="todo-description">{todo.description || 'No description'}</p>
+          <div className="todo-meta">
+            <span className="meta-item"><span className="material-icons">folder</span> {todo.category || 'None'}</span>
+            <span className="meta-item"><span className="material-icons">event</span> {todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : 'None'}</span>
+          </div>
+          <div className="todo-actions">
+            <button onClick={() => toggleComplete(todo)} className={`btn ${todo.isCompleted ? 'btn-warning' : 'btn-success'}`}>
+              <span className="material-icons">{todo.isCompleted ? 'undo' : 'check'}</span> {todo.isCompleted ? 'Undo' : 'Complete'}
+            </button>
+            <button onClick={() => onEdit(todo)} className="btn btn-edit"><span className="material-icons">edit</span> Edit</button>
+            <button onClick={() => handleDelete(todo._id)} className="btn btn-delete"><span className="material-icons">delete</span></button>
+          </div>
         </div>
       ))}
     </div>
