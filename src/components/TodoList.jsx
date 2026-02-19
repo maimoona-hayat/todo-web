@@ -1,50 +1,33 @@
-import React from 'react';
-import { deleteTodo, updateTodo } from '../api';
-import { useToast } from '../context/ToastContext';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 
-function TodoList({ todos = [], onEdit, onDelete }) {
-  const { error, success } = useToast();
+const ToastContext = createContext();
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this todo?')) return;
-    try { await deleteTodo(id); success('Todo deleted!'); onDelete(); }
-    catch (err) { error(err.response?.data?.message || 'Failed to delete'); }
-  };
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) throw new Error('useToast must be used within ToastProvider');
+  return context;
+};
 
-  const toggleComplete = async (todo) => {
-    try {
-      await updateTodo(todo._id, { title: todo.title, description: todo.description, category: todo.category, dueDate: todo.dueDate, isCompleted: !todo.isCompleted });
-      success(todo.isCompleted ? 'Marked as pending!' : 'Marked as completed!');
-      onDelete();
-    } catch (err) { error(err.response?.data?.message || 'Failed to update'); }
-  };
+export const ToastProvider = ({ children }) => {
+  const [toasts, setToasts] = useState([]);
 
-  if (!todos.length) return <div className="empty-state"><span className="material-icons">assignment</span><p>No todos yet. Add your first todo above!</p></div>;
+  const addToast = useCallback((message, type = 'success') => {
+    const id = Date.now() + Math.random();
+    setToasts((prev) => [...prev, { id, message, type }]);
+  }, []);
+
+  const removeToast = useCallback((id) => setToasts((prev) => prev.filter((t) => t.id !== id)), []);
 
   return (
-    <div className="todo-grid">
-      {todos.map((todo) => (
-        <div key={todo._id} className={`todo-card ${todo.isCompleted ? 'completed' : ''}`}>
-          <div className="todo-header">
-            <h4 className={todo.isCompleted ? 'completed-text' : ''}>{todo.title}</h4>
-            <span className={`status-badge ${todo.isCompleted ? 'badge-success' : 'badge-pending'}`}>{todo.isCompleted ? 'Done' : 'Pending'}</span>
-          </div>
-          <p className="todo-description">{todo.description || 'No description'}</p>
-          <div className="todo-meta">
-            <span className="meta-item"><span className="material-icons">folder</span> {todo.category || 'None'}</span>
-            <span className="meta-item"><span className="material-icons">event</span> {todo.dueDate ? new Date(todo.dueDate).toLocaleDateString() : 'None'}</span>
-          </div>
-          <div className="todo-actions">
-            <button onClick={() => toggleComplete(todo)} className={`btn ${todo.isCompleted ? 'btn-warning' : 'btn-success'}`}>
-              <span className="material-icons">{todo.isCompleted ? 'undo' : 'check'}</span> {todo.isCompleted ? 'Undo' : 'Complete'}
-            </button>
-            <button onClick={() => onEdit(todo)} className="btn btn-edit"><span className="material-icons">edit</span> Edit</button>
-            <button onClick={() => handleDelete(todo._id)} className="btn btn-delete"><span className="material-icons">delete</span></button>
-          </div>
-        </div>
-      ))}
-    </div>
+    <ToastContext.Provider value={{ 
+      toasts, 
+      addToast, 
+      removeToast, 
+      success: (m) => addToast(m, 'success'), 
+      error: (m) => addToast(m, 'error'), 
+      warning: (m) => addToast(m, 'warning') 
+    }}>
+      {children}
+    </ToastContext.Provider>
   );
-}
-
-export default TodoList;
+};
