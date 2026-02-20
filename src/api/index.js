@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL: BASE_URL,
 });
 
 // Add token to every request
@@ -13,10 +15,15 @@ API.interceptors.request.use(
     }
     return req;
   },
-  (error) => Promise.reject(error) // forward any request error
+  (error) => Promise.reject(error)
 );
+
 // Auth
-export const registerUser = (data) => API.post("/api/v1/user/register", data);
+export const registerUser = async (formData) => {
+  // Use API instance instead of plain axios
+  return API.post("/api/v1/user/register", formData);
+};
+
 export const loginUser = (data) => API.post("/api/v1/user/login", data);
 
 // Todos

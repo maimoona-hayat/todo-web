@@ -19,9 +19,8 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const userImage = user?.image || '';
-  const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
-
+const userImage = user?.profileImage || '';  
+const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
   const fetchTodos = async (p = 1) => {
     try {
       setLoading(true);
