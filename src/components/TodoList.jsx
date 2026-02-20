@@ -5,10 +5,19 @@ import { useToast } from '../context/ToastContext';
 function TodoList({ todos = [], onEdit, onDelete }) {
   const { error, success } = useToast();
 
+  // Handle undefined or null todos
+  const todoList = todos || [];
+
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this todo?')) return;
-    try { await deleteTodo(id); success('Todo deleted!'); onDelete(); }
-    catch (err) { error(err.response?.data?.message || 'Failed to delete'); }
+    try { 
+      await deleteTodo(id); 
+      success('Todo deleted!'); 
+      onDelete(); 
+    }
+    catch (err) { 
+      error(err.response?.data?.message || 'Failed to delete'); 
+    }
   };
 
   const toggleComplete = async (todo) => {
@@ -22,10 +31,12 @@ function TodoList({ todos = [], onEdit, onDelete }) {
       });
       success(todo.isCompleted ? 'Marked as pending!' : 'Marked as completed!');
       onDelete();
-    } catch (err) { error(err.response?.data?.message || 'Failed to update'); }
+    } catch (err) { 
+      error(err.response?.data?.message || 'Failed to update'); 
+    }
   };
 
-  if (!todos.length) return (
+  if (!todoList.length) return (
     <div className="empty-state">
       <span className="material-icons">assignment</span>
       <p>No todos yet. Add your first todo above!</p>
@@ -34,7 +45,7 @@ function TodoList({ todos = [], onEdit, onDelete }) {
 
   return (
     <div className="todo-grid">
-      {todos.map((todo) => (
+      {todoList.map((todo) => (
         <div key={todo._id} className={`todo-card ${todo.isCompleted ? 'completed' : ''}`}>
           <div className="todo-header">
             <h4 className={todo.isCompleted ? 'completed-text' : ''}>{todo.title}</h4>
