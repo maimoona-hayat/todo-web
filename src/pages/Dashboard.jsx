@@ -50,15 +50,21 @@ function Dashboard() {
     }
   };
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-    fetchTodos(1);
-  }, []);
-
+ useEffect(() => {
+  console.log("Dashboard useEffect running");
+  
+  const token = localStorage.getItem("token");
+  console.log("Token exists:", !!token);
+  
+  if (!token) {
+    console.log("No token, redirecting to login");
+    navigate("/login");
+    return;
+  }
+  
+  console.log("Fetching todos...");
+  fetchTodos(1);
+}, []);
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");

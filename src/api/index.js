@@ -5,14 +5,16 @@ const API = axios.create({
 });
 
 // Add token to every request
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    req.headers['x-auth-token'] = token; 
-  }
-  return req;
-});
-
+API.interceptors.request.use(
+  (req) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      req.headers["x-auth-token"] = token;
+    }
+    return req;
+  },
+  (error) => Promise.reject(error) // forward any request error
+);
 // Auth
 export const registerUser = (data) => API.post("/api/v1/user/register", data);
 export const loginUser = (data) => API.post("/api/v1/user/login", data);
