@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './ProtectedRoute/ProtectedRoute';
 import { ToastProvider } from './context/ToastContext';
+import { ToastContainer } from './components/Toast';
 import './App.css';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
 
 </Routes>
       </Router>
+      <ToastContainer />
     </ToastProvider>
   );
 }
