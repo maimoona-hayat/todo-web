@@ -1,3 +1,4 @@
+// src/pages/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TodoList from "../components/TodoList";
@@ -75,7 +76,8 @@ function Dashboard() {
             className="user-avatar"
             onClick={() => setShowMenu(!showMenu)}
             style={{
-              backgroundImage: userImage ? `url(${userImage})` : undefined,
+              // FIX: Added 'none' as the fallback value
+              backgroundImage: userImage ? `url(${userImage})` : 'none', 
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
