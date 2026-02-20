@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerUser } from '../api';
-import { useToast } from '../context/ToastContext';
 
 function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const navigate = useNavigate();
-  const { error, success } = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -18,11 +16,11 @@ function Register() {
     try {
       const res = await registerUser(form);
       if (res.data.isSuccess) {
-        success('Account created! Please login.');
+        alert('Account created! Please login.');
         navigate('/login');
       }
     } catch (err) {
-      error(err.response?.data?.message || 'Registration failed');
+      alert(err.response?.data?.message || 'Registration failed');
     }
   };
 
