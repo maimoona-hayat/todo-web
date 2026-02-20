@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { loginUser } from '../api';
+import { useToast } from '../context/ToastContext';
 
 function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -19,13 +21,13 @@ function Login() {
         localStorage.setItem('token', res.data.data.token);
         const { password, ...userWithoutPassword } = res.data.data.user;
         localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-        alert('Login successful!');
+        toast.success('Login successful!');
         navigate('/dashboard', { replace: true });
       } else {
-        alert(res.data.message || 'Login failed');
+        toast.error(res.data.message || 'Login failed');
       }
     } catch (err) {
-      alert(err.response?.data?.message || 'Login failed');
+      toast.error(err.response?.data?.message || 'Login failed');
     }
   };
 

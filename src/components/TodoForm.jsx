@@ -4,7 +4,7 @@ import { useToast } from '../context/ToastContext';
 
 function TodoForm({ onSave, editing }) {
   const [form, setForm] = useState({ title: '', description: '', category: '', dueDate: '' });
-  const { error, success, warning } = useToast();
+  const toast = useToast();
 
   useEffect(() => {
     if (editing) {
@@ -23,14 +23,24 @@ function TodoForm({ onSave, editing }) {
     e.preventDefault();
     if (form.dueDate) {
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      if (new Date(form.dueDate) < today) { warning('Due date cannot be in the past'); return; }
+      if (new Date(form.dueDate) < today) {
+        toast.warning('Due date cannot be in the past');
+        return;
+      }
     }
     try {
-      if (editing) { await updateTodo(editing._id, form); success('Todo updated!'); }
-      else { await createTodo(form); success('Todo created!'); }
+      if (editing) {
+        await updateTodo(editing._id, form);
+        toast.success('Todo updated!');
+      } else {
+        await createTodo(form);
+        toast.success('Todo created!');
+      }
       onSave();
       setForm({ title: '', description: '', category: '', dueDate: '' });
-    } catch (err) { error(err.response?.data?.message || 'Error saving todo'); }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Error saving todo');
+    }
   };
 
   return (

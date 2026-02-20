@@ -12,45 +12,45 @@ const Toast = ({ message, type = 'success', onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const getStyles = () => {
-    switch (type) {
-      case 'error':
-        return { background: '#fef2f2', border: '#ef4444', color: '#991b1b', icon: 'error' };
-      case 'warning':
-        return { background: '#fffbeb', border: '#f59e0b', color: '#92400e', icon: 'warning' };
-      default:
-        return { background: '#ecfdf5', border: '#10b981', color: '#065f46', icon: 'check_circle' };
-    }
+  const colors = {
+    success: { bg: '#ecfdf5', border: '#10b981', text: '#065f46', icon: 'check_circle' },
+    error: { bg: '#fef2f2', border: '#ef4444', text: '#991b1b', icon: 'error' },
+    warning: { bg: '#fffbeb', border: '#f59e0b', text: '#92400e', icon: 'warning' }
   };
 
-  const styles = getStyles();
+  const c = colors[type] || colors.success;
 
   return (
-    <div className={`toast toast-${type}`} style={{
-      position: 'fixed', bottom: '24px', left: '24px', padding: '14px 20px',
-      borderRadius: '12px', borderLeft: `4px solid ${styles.border}`,
-      background: styles.background, color: styles.color,
-      boxShadow: '0 10px 25px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center',
-      gap: '12px', fontSize: '14px', fontWeight: '500', zIndex: '9999',
-      transform: visible ? 'translateX(0)' : 'translateX(-120%)',
-      opacity: visible ? '1' : '0', transition: 'all 0.3s ease', maxWidth: '380px'
+    <div style={{
+      position: 'fixed', bottom: '20px', left: '20px', padding: '14px 20px',
+      borderRadius: '8px', borderLeft: `4px solid ${c.border}`, background: c.bg, color: c.text,
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center',
+      gap: '10px', fontSize: '14px', fontWeight: '500', zIndex: '9999',
+      transform: visible ? 'translateX(0)' : 'translateX(-100%)', opacity: visible ? 1 : 0,
+      transition: 'all 0.3s ease', maxWidth: '350px'
     }}>
-      <span className="material-icons" style={{ fontSize: '22px', color: styles.border }}>{styles.icon}</span>
+      <span className="material-icons">{c.icon}</span>
       <span style={{ flex: 1 }}>{message}</span>
-      <button onClick={() => { setVisible(false); setTimeout(onClose, 300); }}
-        style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, opacity: 0.6 }}>
-        <span className="material-icons" style={{ fontSize: '20px' }}>close</span>
+      <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <span className="material-icons" style={{ fontSize: '18px' }}>close</span>
       </button>
     </div>
   );
 };
 
-export const ToastContainer = ({ toasts, removeToast }) => (
-  <div style={{ position: 'fixed', bottom: '20px', left: '20px', zIndex: 9999 }}>
-    {toasts.map((toast) => (
-      <Toast key={toast.id} message={toast.message} type={toast.type} onClose={() => removeToast(toast.id)} />
-    ))}
-  </div>
-);
+export const ToastContainer = ({ toasts, removeToast }) => {
+  return (
+    <div>
+      {toasts.map((toast) => (
+        <Toast 
+          key={toast.id} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => removeToast(toast.id)} 
+        />
+      ))}
+    </div>
+  );
+};
 
 export default Toast;

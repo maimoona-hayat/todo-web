@@ -1,18 +1,20 @@
 import React from 'react';
 import { deleteTodo, updateTodo } from '../api';
+import { useToast } from '../context/ToastContext';
 
 function TodoList({ todos = [], onEdit, onDelete }) {
+  const toast = useToast();
   const todoList = todos || [];
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this todo?')) return;
     try { 
       await deleteTodo(id); 
-      alert('Todo deleted!'); 
+      toast.success('Todo deleted!'); 
       onDelete(); 
     }
     catch (err) { 
-      alert(err.response?.data?.message || 'Failed to delete'); 
+      toast.error(err.response?.data?.message || 'Failed to delete'); 
     }
   };
 
@@ -25,10 +27,10 @@ function TodoList({ todos = [], onEdit, onDelete }) {
         dueDate: todo.dueDate, 
         isCompleted: !todo.isCompleted 
       });
-      alert(todo.isCompleted ? 'Marked as pending!' : 'Marked as completed!');
+      toast.success(todo.isCompleted ? 'Marked as pending!' : 'Marked as completed!');
       onDelete();
     } catch (err) { 
-      alert(err.response?.data?.message || 'Failed to update'); 
+      toast.error(err.response?.data?.message || 'Failed to update'); 
     }
   };
 
