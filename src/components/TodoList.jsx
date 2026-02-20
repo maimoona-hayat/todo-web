@@ -4,7 +4,9 @@ import { useToast } from '../context/ToastContext';
 
 function TodoList({ todos = [], onEdit, onDelete }) {
   const toast = useToast();
-  const todoList = todos || [];
+
+  // Ensure todos is always an array
+  const todoList = Array.isArray(todos) ? todos : [];
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this todo?')) return;
@@ -12,8 +14,7 @@ function TodoList({ todos = [], onEdit, onDelete }) {
       await deleteTodo(id); 
       toast.success('Todo deleted!'); 
       onDelete(); 
-    }
-    catch (err) { 
+    } catch (err) { 
       toast.error(err.response?.data?.message || 'Failed to delete'); 
     }
   };

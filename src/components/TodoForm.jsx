@@ -23,8 +23,8 @@ function TodoForm({ onSave, editing }) {
     e.preventDefault();
     if (form.dueDate) {
       const today = new Date(); today.setHours(0, 0, 0, 0);
-      if (new Date(form.dueDate) < today) {
-        toast.warning('Due date cannot be in the past');
+      if (new Date(form.dueDate) <= today) {
+        toast.warning('Due date cannot be in the past or today');
         return;
       }
     }

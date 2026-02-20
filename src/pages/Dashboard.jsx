@@ -18,16 +18,22 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userImage = user?.image || '';
   const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
 
   const fetchTodos = async (p = 1) => {
     try {
       setLoading(true);
       const res = await getTodos(p);
-      if (res?.data?.isSuccess && res?.data?.data) {
-        setTodos(res.data.data.todos || []);
-        setTotal(res.data.data.total || 0);
+      const data = res?.data;
+      
+      if (data?.isSuccess && data?.data) {
+        setTodos(Array.isArray(data.data.todos) ? data.data.todos : []);
+        setTotal(data.data.total || 0);
         setPage(p);
+      } else {
+        setTodos([]);
+        setTotal(0);
       }
     } catch (err) {
       if (err?.response?.status === 401) {
@@ -36,6 +42,7 @@ function Dashboard() {
         navigate("/login");
       } else {
         toast.error('Failed to fetch todos');
+        setTodos([]);
       }
     } finally {
       setLoading(false);
@@ -64,8 +71,16 @@ function Dashboard() {
           My Todos
         </h1>
         <div className="user-menu">
-          <div className="user-avatar" onClick={() => setShowMenu(!showMenu)}>
-            {firstLetter}
+          <div
+            className="user-avatar"
+            onClick={() => setShowMenu(!showMenu)}
+            style={{
+              backgroundImage: userImage ? `url(${userImage})` : undefined,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            {!userImage && firstLetter}
           </div>
           {showMenu && (
             <div className="user-dropdown">
