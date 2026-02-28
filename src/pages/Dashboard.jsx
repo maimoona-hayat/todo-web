@@ -5,7 +5,7 @@ import TodoList from "../components/TodoList";
 import TodoForm from "../components/TodoForm";
 import Pagination from "../components/Pagination";
 import { useToast } from '../context/ToastContext';
-import { getTodos } from "../api";
+import { getTodos } from "../axios";
 
 function Dashboard() {
   const navigate = useNavigate();
