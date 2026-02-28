@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerUser } from '../axios';
+import { registerUser } from '../axios/api';
 import { useToast } from '../context/ToastContext';
 
 function Register() {

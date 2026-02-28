@@ -1,5 +1,5 @@
 import React from 'react';
-import { deleteTodo, updateTodo } from '../axios';
+import { deleteTodo, updateTodo } from '../axios/api';
 import { useToast } from '../context/ToastContext';
 
 function TodoList({ todos = [], onEdit, onDelete }) {
