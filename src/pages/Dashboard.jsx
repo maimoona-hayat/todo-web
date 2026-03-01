@@ -1,10 +1,9 @@
-// src/pages/Dashboard.jsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TodoList from "../components/TodoList";
 import TodoForm from "../components/TodoForm";
 import Pagination from "../components/Pagination";
-import { useToast } from '../context/ToastContext';
+import { useToast } from "../context/ToastContext";
 import { getTodos } from "../axios/api";
 
 function Dashboard() {
@@ -19,14 +18,14 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-const userImage = user?.profileImage || '';  
-const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
+  const userImage = user?.profileImage || "";
+  const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
   const fetchTodos = async (p = 1) => {
     try {
       setLoading(true);
       const res = await getTodos(p);
       const data = res?.data;
-      
+
       if (data?.isSuccess && data?.data) {
         setTodos(Array.isArray(data.data.todos) ? data.data.todos : []);
         setTotal(data.data.total || 0);
@@ -38,10 +37,10 @@ const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
     } catch (err) {
       if (err?.response?.status === 401) {
         localStorage.clear();
-        toast.error('Session expired. Please login again');
+        toast.error("Session expired. Please login again");
         navigate("/login");
       } else {
-        toast.error('Failed to fetch todos');
+        toast.error("Failed to fetch todos");
         setTodos([]);
       }
     } finally {
@@ -49,21 +48,16 @@ const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
     }
   };
 
- useEffect(() => {
-  console.log("Dashboard useEffect running");
-  
-  const token = localStorage.getItem("token");
-  console.log("Token exists:", !!token);
-  
-  if (!token) {
-    console.log("No token, redirecting to login");
-    navigate("/login");
-    return;
-  }
-  
-  console.log("Fetching todos...");
-  fetchTodos(1);
-}, []);
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    fetchTodos(1);
+  }, []);
   const handleLogout = () => {
     localStorage.clear();
     navigate("/login");
@@ -81,10 +75,10 @@ const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
             className="user-avatar"
             onClick={() => setShowMenu(!showMenu)}
             style={{
-              // FIX: Added 'none' as the fallback value
-              backgroundImage: userImage ? `url(${userImage})` : 'none', 
-              backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundImage: userImage ? `url(${userImage})` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundColor: !userImage ? "#8fb5dd" : "transparent",
             }}
           >
             {!userImage && firstLetter}
@@ -117,7 +111,11 @@ const firstLetter = user?.username?.charAt(0)?.toUpperCase() || "U";
         </div>
       ) : (
         <>
-          <TodoList todos={todos} onEdit={setEditing} onDelete={() => fetchTodos(page)} />
+          <TodoList
+            todos={todos}
+            onEdit={setEditing}
+            onDelete={() => fetchTodos(page)}
+          />
           <Pagination total={total} page={page} onPageChange={fetchTodos} />
         </>
       )}

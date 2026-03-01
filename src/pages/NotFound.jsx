@@ -1,4 +1,3 @@
-
 function NotFound() {
   return (
     <div style={{ textAlign: 'center', marginTop: '50px', color: '#7e2727', fontWeight: 'bold' }}>

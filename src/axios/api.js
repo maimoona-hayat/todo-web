@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const BASE_URL =
-  import.meta.env.VITE_API_URL ;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const instance = axios.create({
   baseURL: BASE_URL,
@@ -20,10 +19,9 @@ instance.interceptors.request.use(
   },
   (error) => {
     console.error("Request error:", error);
-    return Promise.reject(error); 
-  }
+    return Promise.reject(error);
+  },
 );
-
 
 // Response Interceptor
 instance.interceptors.response.use(
@@ -38,26 +36,22 @@ instance.interceptors.response.use(
       window.location.href = "/login";
     }
 
-    return Promise.reject(error); 
-  }
+    return Promise.reject(error);
+  },
 );
 
 // Auth
 export const registerUser = (formData) =>
   instance.post("/api/v1/user/register", formData);
 
-export const loginUser = (data) =>
-  instance.post("/api/v1/user/login", data);
+export const loginUser = (data) => instance.post("/api/v1/user/login", data);
 
 // Todos
-export const getTodos = (page = 1) =>
-  instance.get(`/api/v1/todo?page=${page}`);
+export const getTodos = () => instance.get(`/api/v1/todo`);
 
-export const createTodo = (data) =>
-  instance.post("/api/v1/todo", data);
+export const createTodo = (data) => instance.post("/api/v1/todo", data);
 
 export const updateTodo = (id, data) =>
   instance.put(`/api/v1/todo/${id}`, data);
 
-export const deleteTodo = (id) =>
-  instance.delete(`/api/v1/todo/${id}`);
+export const deleteTodo = (id) => instance.delete(`/api/v1/todo/${id}`);
