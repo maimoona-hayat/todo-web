@@ -47,7 +47,7 @@ export const registerUser = (formData) =>
 export const loginUser = (data) => instance.post("/api/v1/user/login", data);
 
 // Todos
-export const getTodos = (page = 1) => axios.get(`/todos?page=${page}`);
-export const createTodo = (data) => axios.post("/todos", data);
-export const updateTodo = (id, data) => axios.put(`/todos/${id}`, data);
-export const deleteTodo = (id) => axios.delete(`/todos/${id}`);
+export const getTodos = (page = 1) => instance.get(`/api/v1/todos?page=${page}`);
+export const createTodo = (data) => instance.post("/api/v1/todos", data);
+export const updateTodo = (id, data) => instance.put(`/api/v1/todos/${id}`, data);
+export const deleteTodo = (id) => instance.delete(`/api/v1/todos/${id}`);
